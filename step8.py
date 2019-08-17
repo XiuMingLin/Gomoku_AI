@@ -13,16 +13,19 @@ board_list = board_json['questions']
 
 board = numpy.empty((15, 15), dtype=numpy.str)
 
-score = {10000, 6000, 5000, 2500, 2000, 400, 400, 200, 50, 20}
-score_str0 = {'CMMMM', 'MCMMM', 'MMCMM', 'MMMCM', 'MMMMC'}
-score_str1 = {'OOOOC', 'COOOO'}
-score_str2 = {'.CMMM.', '.MCMM.', '.MMCM.', '.MMMC.'}
-score_str3 = {'COOO.', '.OOOC', '.OOCO.', '.OCOO'}
-score_str4 = {'OCMMM.', 'OMCMM.', 'OMMCM.', 'OMMMC.', '.CMMMO', '.MCMMO', '.MMCMO', '.MMMCO'}
-score_str5 = {'.MMC', '.MCM', '.CMM'}
-score_str6 = {'.OOC', 'COO,', 'MOOOC', 'COOOM'}
-score_str7 = {'.MMCO', '.MCMO', '.CMMO', 'OMMC.', 'OMCM.', 'OCMM.', 'MOOC', 'COOM'}
-score_str8 = {'.MC.', '.CM.'}
+score_list = numpy.zeros((15, 15))
+
+score = [10000, 6000, 5000, 2500, 2000, 400, 400, 200, 50, 20]
+score_str0 = ['CMMMM', 'MCMMM', 'MMCMM', 'MMMCM', 'MMMMC']
+score_str1 = ['OOOOC', 'COOOO']
+score_str2 = ['.CMMM.', '.MCMM.', '.MMCM.', '.MMMC.']
+score_str3 = ['COOO.', '.OOOC', '.OOCO.', '.OCOO.']
+score_str4 = ['OCMMM.', 'OMCMM.', 'OMMCM.', 'OMMMC.', '.CMMMO', '.MCMMO', '.MMCMO', '.MMMCO']
+score_str5 = ['.MMC.', '.MCM.', '.CMM.']
+score_str6 = ['.OOC', 'COO,', 'MOOOC', 'COOOM']
+score_str7 = ['.MMCO', '.MCMO', '.CMMO', 'OMMC.', 'OMCM.', 'OCMM.', 'MOOC', 'COOM']
+score_str8 = ['.MC.', '.CM.']
+
 
 def change_board(x, y, type):
     s = ''
@@ -128,8 +131,7 @@ def check_chess_type(x, y, type):
 
 
 def find_score(str_board_type):
-    max = 0
-    total_score = 0
+    total_score = 20
     for i in range(len(score_str0)):
         if str_board_type.find(score_str0[i]) != -1:
             total_score += score[0]
@@ -157,28 +159,48 @@ def find_score(str_board_type):
     for i in range(len(score_str8)):
         if str_board_type.find(score_str8[i]) != -1:
             total_score += score[8]
-
+    # print(total_score)
     return total_score
 
 
 def set_score(board_str):
+    max_score = 0
     init_board()
     init_board2(board_str)
     if (len(board_str) // 2) % 2 == 0:
         change_board_2(1)
     else:
         change_board_2(2)
-
+    # print(board)
     for i in range(15):
         for j in range(15):
             if board[i][j] == '.':
                 board[i][j] = 'C'
-                print(check_chess_type(i, j, 1))
-                find_score(check_chess_type(i, j, 1))
+                # print(check_chess_type(i, j, 1))
+                current_score = 0
+                current_score += find_score(check_chess_type(i, j, 1))
+                current_score += find_score(check_chess_type(i, j, 2))
+                current_score += find_score(check_chess_type(i, j, 3))
+                current_score += find_score(check_chess_type(i, j, 4))
+                score_list[i][j] += current_score
+                if max_score < current_score:
+                    max_score = current_score
                 board[i][j] = '.'
-                # print(check_chess_type(i, j, 2))
-                # print(check_chess_type(i, j, 3))
-                # print(check_chess_type(i, j, 4))
+    for i in range(15):
+        for j in range(15):
+            if score_list[i][j] == max_score:
+                s = chr(i+ord('a')) + chr(j+ord('a'))
+                return s
+    s = ''
+    return s
 
 
-set_score(board_list[0])
+ans = ''
+for i in range(len(board_list)):
+    score_list = numpy.zeros((15,15))
+    ans += set_score(board_list[i]) + ','
+
+print(ans[:-1])
+
+get_url = url + '?ans=' + ans[:-1]
+print(get_url)

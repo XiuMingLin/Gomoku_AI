@@ -3,11 +3,14 @@ import json
 import numpy
 import time
 
+# 'http://202.207.12.223:8000/context/2e329756827e42330f7897cc9499588e'
+
 visit_url = 'http://202.207.12.223:8000/join_game'
 play_url = 'http://202.207.12.223:8000/play_game/'   # +id
 check_url = 'http://202.207.12.223:8000/check_game/'
 
-user = 'mea'
+
+user = 'aqua'
 password = '123321'
 
 key = [65537,
@@ -26,7 +29,11 @@ score_str6 = [".OOC","COO.",".COO",".OCO"]
 score_str7 = [".MMCO",".MCMO",".CMMO","OMMC.","OMCM.","OCMM.","MOOC","COOM"]
 score_str8 = [".MC.",".CM."]
 score_str9 = [".OOOOC","COOOO."]
-
+my_score = 0
+he_score = 0
+iskome = 0
+islose = 0
+other_score = 0
 
 is_success = ''
 winner = ''
@@ -113,11 +120,13 @@ def check_chess_type(x, y, type):
 
 def find_score(str_board_type):
     total_score = 20
+    global iskome
     for i in range(len(score_str0)):
         if str_board_type.find(score_str0[i]) != -1:
             total_score += score[0]
     for i in range(len(score_str1)):
         if str_board_type.find(score_str1[i]) != -1:
+            iskome = 1
             total_score += score[1]
     for i in range(len(score_str2)):
         if str_board_type.find(score_str2[i]) != -1:
@@ -182,13 +191,14 @@ def change_board_2(type):
 
 
 def set_score(board_str):
-    max_score = 0
+    global other_score
     init_board()
     init_board2(board_str)
     if (len(board_str) // 2) % 2 == 0:
         change_board_2(1)
     else:
         change_board_2(2)
+    max_score = 0
     # print(board)
     for i in range(15):
         for j in range(15):
@@ -204,6 +214,7 @@ def set_score(board_str):
                 if max_score < current_score:
                     max_score = current_score
                 board[i][j] = '.'
+    other_score = max_score
     for i in range(15):
         for j in range(15):
             if score_list[i][j] == max_score:
@@ -211,7 +222,6 @@ def set_score(board_str):
                 return s
     s = ''
     return s
-
 
 
 def str_2_num(x):
@@ -282,9 +292,13 @@ def init_json(json_str):
     # print(win_step)
 
 
-
-
 def playgame():
+    global he_score
+    global my_score
+    global other_score
+    he_score = 0
+    my_score = 0
+    other_score = 0
     password_key = DH(password)
 
     visit_url_finally = visit_url + '?user=' + user + '&password=' + password_key + '&data_type=json'
@@ -327,7 +341,7 @@ def playgame():
                 nextQP = set_score(board_str)
                 print(nextQP)
                 print('http://202.207.12.223:8000/play_game/' + str(game_id) + '/?user=' + user + '&password=' + password_key + '&coord=' + nextQP)
-                play_responce = requests.get('http://202.207.12.223:8000/play_game/' + str(game_id) + '?user=' + user + '&password=' + password_key + '&coord=' + nextQP)
+                play_responce = requests.get('http://202.207.12.223:8000/play_game/' + str(game_id) + '?user=' + user + '&password=' + password_key + '&coord=' + MaxMinState())
                 print(play_responce.text)
 
         check_json = json.loads(requests.get(check_url + str(game_id)).text)
@@ -343,6 +357,31 @@ def playgame():
         time.sleep(5)
 
 
+def MaxMinState():
+    global iskome
+    global other_score
+    global my_score
+    global he_score
+    my_score = 0
+    he_score = 0
+    other_score = 0
+    temp_board = board_str
+    s = set_score(temp_board)
+    my_score = other_score
+    if iskome == 1:
+        iskome = 0
+        return set_score(board_str)
+    else:
+        temp_board += s
+        set_score(temp_board)
+        he_score = other_score
+        if my_score > he_score:
+            return set_score(board_str)
+        else:
+            temp_board = temp_board + set_score(temp_board)
+            return set_score(temp_board)
 
-while 1:
-    playgame()
+
+if __name__=="__main__":
+    while 1:
+        playgame()
