@@ -304,7 +304,9 @@ def playgame():
     visit_url_finally = visit_url + '?user=' + user + '&password=' + password_key + '&data_type=json'
     visit_response = requests.get(visit_url_finally)
     game_id = json.loads(visit_response.text)['game_id']
-    print(game_id)
+    visit_url_finally = visit_url + '?user=' + user + '&password=' + password_key
+    visit_response = requests.get(visit_url_finally)
+    print(visit_response.url)
 
     check_url_finally = check_url + str(game_id)
     print(check_url_finally)
@@ -341,7 +343,7 @@ def playgame():
                 nextQP = set_score(board_str)
                 print(nextQP)
                 print('http://202.207.12.223:8000/play_game/' + str(game_id) + '/?user=' + user + '&password=' + password_key + '&coord=' + nextQP)
-                play_responce = requests.get('http://202.207.12.223:8000/play_game/' + str(game_id) + '?user=' + user + '&password=' + password_key + '&coord=' + MaxMinState())
+                play_responce = requests.get('http://202.207.12.223:8000/play_game/' + str(game_id) + '?user=' + user + '&password=' + password_key + '&coord=' + nextQP)
                 print(play_responce.text)
 
         check_json = json.loads(requests.get(check_url + str(game_id)).text)

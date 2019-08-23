@@ -6,6 +6,7 @@ import gym
 import time
 import math
 import Env
+import os
 
 GAMMA = 0.9
 INITIAL_EPSILION = 0.1
@@ -210,6 +211,9 @@ def main():
                 print('结束步数', step, 'Reward:', reward_agent)
                 break
 
+        if episode % 500 == 0:
+            saver = tf.train.Saver()
+            saver.save(agent.session, 'model/model', global_step=episode)
         # # Test every 100 episodes
         # if episode % 100 == 99:
         #     total_reward = 0
